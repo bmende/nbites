@@ -34,6 +34,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include "Vision.h" // Vision Class Header File
+
 #include "FieldLines/CornerDetector.h"
 #include "FieldLines/FieldLinesDetector.h"
 
@@ -172,23 +173,23 @@ void Vision::notifyImage(const ThresholdImage& topThrIm, const PackedImage16& to
     // counts the frameNumber
     if (frameNumber > 1000000) frameNumber = 0;
 
-   linesDetector->detect(thresh->getVisionHorizon(),
-                        thresh->field->getTopEdge(),
-                        yImg);
+   // linesDetector->detect(thresh->getVisionHorizon(),
+   //                      thresh->field->getTopEdge(),
+   //                      yImg);
 
-   cornerDetector->detect(thresh->getVisionHorizon(),
-                          thresh->field->getTopEdge(),
-                          linesDetector->getLines());
+   // cornerDetector->detect(thresh->getVisionHorizon(),
+   //                        thresh->field->getTopEdge(),
+   //                        linesDetector->getLines());
 
     // Perform image correction, thresholding, and object recognition
 
     thresh->visionLoop(ja, inert);
-//    thresh->obstacleLoop(ja, inert);
+    thresh->obstacleLoop(ja, inert);
 
    // drawEdges(*linesDetector->getEdges());
    // drawHoughLines(linesDetector->getHoughLines());
 	drawVisualLines(linesDetector->getLines(), *linesDetector->getEdges());
-//    drawVisualCorners(cornerDetector->getCorners());
+	drawVisualCorners(cornerDetector->getCorners());
 
     thresh->transposeDebugImage();
 
@@ -644,7 +645,7 @@ void Vision::drawHoughLine(const HoughLine& line, int color)
 #endif
 }
 
-	void Vision::drawVisualLines(const vector<HoughVisualLine>& lines, Gradient& g)
+void Vision::drawVisualLines(const vector<HoughVisualLine>& lines, Gradient& g)
 {
 #ifdef OFFLINE
     if (true){
@@ -664,7 +665,7 @@ void Vision::drawHoughLine(const HoughLine& line, int color)
 void Vision::drawVisualCorners(const vector<HoughVisualCorner>& corners)
 {
 #ifdef OFFLINE
-    if (thresh->debugVisualCorners) {
+    if (true) {
         for (vector<HoughVisualCorner>::const_iterator i = corners.begin();
              i != corners.end(); ++i) {
             point<int> pt = i->getImageLocation();

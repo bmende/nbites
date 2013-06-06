@@ -1,5 +1,4 @@
-#ifndef Threshold_h_DEFINED
-#define Threshold_h_DEFINED
+#pragma once
 
 #include <boost/shared_ptr.hpp>
 
@@ -325,4 +324,3 @@ private:
 }
 }
 
-#endif // RLE_h_DEFINED

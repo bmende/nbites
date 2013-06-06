@@ -218,6 +218,8 @@ namespace vision {
 		// master loop
 		void lineLoop();
 
+		void houghLineLoop();
+
 		// While lineLoop is called before object recognition so that
 		// ObjectFragments can make use of VisualLines and VisualCorners,
 		// the methods called from here use FieldObjects and as such must be

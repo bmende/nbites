@@ -62,6 +62,7 @@ namespace vision {
 #include "VisualCorner.h"
 #include "VisualObstacle.h"
 
+
 namespace man {
 namespace vision {
 

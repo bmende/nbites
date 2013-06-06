@@ -5,6 +5,8 @@
 
 #include "Profiler.h"
 #include "FieldLines.h"
+#include "FieldLines/CornerDetector.h"
+#include "FieldLines/FieldLinesDetector.h"
 using namespace std;
 
 namespace man {
@@ -158,6 +160,36 @@ void FieldLines::lineLoop()
     PROF_ENTER(P_INTERSECT_LINES);
     cornersList = intersectLines();
     PROF_EXIT(P_INTERSECT_LINES);
+}
+
+// This will be the loop for running the hough transform line finder
+void FieldLines::houghLineLoop()
+{
+
+	vision->linesDetector->detect(vision->thresh->getVisionHorizon(),
+								  vision->thresh->field->getTopEdge(),
+								  vision->yImg);
+
+	vision->cornerDetector->detect(vision->thresh->getVisionHorizon(),
+								   vision->thresh->field->getTopEdge(),
+								   vision->linesDetector->getLines());
+
+	const vector<HoughVisualLine>& h_lines = vision->linesDetector->getLines();
+	
+
+    vector < boost::shared_ptr<VisualLine> > lines;
+
+	vector<HoughVisualLine>::const_iterator line_iter;
+	for (line_iter = h_lines.begin(); line_iter != h_lines.end(); line_iter++) {
+		pair<HoughLine, HoughLine> lp = line_iter->getHoughLines();
+		boost::shared_ptr<VisualLine> vl (new VisualLine(lp.first, lp.second, 
+														 *vision->linesDetector->getEdges()));
+		lines.push_back(vl);
+	}
+
+	linesList = lines;
+
+	
 }
 
 // While lineLoop is called before object recognition so that ObjectFragments
