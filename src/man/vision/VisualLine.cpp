@@ -674,15 +674,15 @@ const bool VisualLine::hasPositiveID()
 }
 
 const std::vector<lineID> VisualLine::getIDs() {
-  std::vector<lineID> poss;
+    std::vector<lineID> poss;
 
-  for (list<const ConcreteLine*>::const_iterator
-	 currLine = possibleLines.begin();
-       currLine != possibleLines.end(); currLine++) {
-    poss.push_back((**currLine).getID());
-  }
+    for (list<const ConcreteLine*>::const_iterator
+             currLine = possibleLines.begin();
+         currLine != possibleLines.end(); currLine++) {
+        poss.push_back((**currLine).getID());
+    }
 
-  return poss;
+    return poss;
 }
 
 }

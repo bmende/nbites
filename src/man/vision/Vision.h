@@ -40,6 +40,7 @@ class HoughVisualCorner;
 #include "Threshold.h"
 #include "NaoPose.h"
 #include "FieldLines.h"
+#include "HoughFieldLines.h"
 #include "VisualCorner.h"
 #include "VisualObstacle.h"
 
@@ -158,6 +159,7 @@ public:
     VisualObstacle* obstacles;
     boost::shared_ptr<NaoPose> pose;
     boost::shared_ptr<FieldLines> fieldLines;
+    boost::shared_ptr<HoughFieldLines> houghLines;
 
     fieldOpening fieldOpenings[3];
 #define NUM_OPEN_FIELD_SEGMENTS 3

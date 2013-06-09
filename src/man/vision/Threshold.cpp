@@ -247,7 +247,7 @@ void Threshold::visionLoop(const messages::JointAngles& ja, const messages::Iner
     // getCorners().
 
     PROF_ENTER(P_LINES);
-	vision->fieldLines->houghLineLoop();
+	vision->houghLines->lineLoop();
     PROF_EXIT(P_LINES);
 
     // do recognition
@@ -271,19 +271,19 @@ void Threshold::visionLoop(const messages::JointAngles& ja, const messages::Iner
 #endif
 
     if (vision->ball->getRadius() == 0) {
-      
+
         usingTopCamera = false;
-      
-      
+
+
         /*****************************************/pose->transform(usingTopCamera, ja, inert);
 
-      
+
         orange->init(pose->getHorizonSlope());
         lowerRuns();
-      
+
         vision->ball->init();
         vision->ball->setTopCam(usingTopCamera);
-      
+
         if (horizon < IMAGE_HEIGHT) {
             orange->createBall(horizon);
         } else {
@@ -298,10 +298,10 @@ void Threshold::visionLoop(const messages::JointAngles& ja, const messages::Iner
     bool yrp = right &&
         (vision->ygrp->getLeftBottomY() > IMAGE_HEIGHT - 5 ||
          vision->ygrp->getRightBottomY() > IMAGE_HEIGHT - 5);
-    
+
     if ((ylp || yrp) && !(left && right)) {
         usingTopCamera = false;
-      
+
         /************************************************/pose->transform(usingTopCamera, ja, inert);
         yellow->init(pose->getHorizonSlope());
         if (ylp) {

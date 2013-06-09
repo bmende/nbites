@@ -41,6 +41,7 @@ SET( VISION_SRCS Ball
                  Cross
                  Field
                  FieldLines.cpp
+		 HoughFieldLines
                  ObjectFragments
                  Robots
                  Threshold

@@ -74,11 +74,11 @@ void VisionModule::run_()
 
 	topOutPic.setMessage(top);
 	botOutPic.setMessage(bot);
-		
+
 #endif
-    /* In order to keep logs synced up, joint angs and inert states are passed 
-     * thru the vision system. Joint angles are taken at around 100 hz, but 
-     * images are taken at 30 hz, but by passing joint angles thru vision we 
+    /* In order to keep logs synced up, joint angs and inert states are passed
+     * thru the vision system. Joint angles are taken at around 100 hz, but
+     * images are taken at 30 hz, but by passing joint angles thru vision we
      * get joint angles at 30 hz. */
 #ifdef LOG_VISION
     joint_angles_out.setMessage(portals::Message<messages::JointAngles>(
@@ -167,7 +167,7 @@ void VisionModule::updateVisionField() {
     portals::Message<messages::VisionField> field_data(0);
 
     // setting lines info
-    const std::vector<boost::shared_ptr<VisualLine> >* visualLines = vision->fieldLines->getLines();
+    const std::vector<boost::shared_ptr<VisualLine> >* visualLines = vision->houghLines->getLines();
     for(std::vector<boost::shared_ptr<VisualLine> >::const_iterator i = visualLines->begin();
         i != visualLines->end(); i++)
     {

@@ -56,6 +56,8 @@ Vision::Vision()
     pose = boost::shared_ptr<NaoPose>(new NaoPose());
     thresh = new Threshold(this, pose);
     fieldLines = boost::shared_ptr<FieldLines>(new FieldLines(this, pose));
+    houghLines = boost::shared_ptr<HoughFieldLines>
+        (new HoughFieldLines(this, pose));
     // thresh->setIm(&global_8_image[0]);
 }
 
@@ -166,7 +168,7 @@ void Vision::notifyImage(const ThresholdImage& topThrIm, const PackedImage16& to
     thresh->obstacleLoop(ja, inert);
 
    // drawEdges(*linesDetector->getEdges());
-   // drawHoughLines(linesDetector->getHoughLines());
+    drawHoughLines(linesDetector->getHoughLines());
 	drawVisualLines(linesDetector->getLines(), *linesDetector->getEdges());
 	drawVisualCorners(cornerDetector->getCorners());
 
@@ -595,7 +597,7 @@ void Vision::drawEdges(Gradient& g)
 void Vision::drawHoughLines(const list<HoughLine>& lines)
 {
 #ifdef OFFLINE
-    if (thresh->debugHoughTransform){
+    if (true){
         list<HoughLine>::const_iterator line;
         for (line = lines.begin() ; line != lines.end(); line++){
             drawHoughLine(*line, MAROON);
@@ -635,7 +637,6 @@ void Vision::drawVisualLines(const vector<HoughVisualLine>& lines, Gradient& g)
             VisualLine *vl = new VisualLine(lp.first, lp.second, g);
             drawLine(vl->getStartpoint(), vl->getEndpoint(), color);
             color++;
-            cout << "start: " << vl->getStartpoint() << " end: " << vl->getEndpoint() << endl;
         }
     }
 #endif

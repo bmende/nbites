@@ -100,7 +100,7 @@ class VisualLine : public VisualLandmark {
  public: // Constants
 
     static const unsigned int NUM_POINTS_TO_BE_VALID_LINE = 3;
-
+    point<int> tr, tl, br, bl;  // top right/left, bottom right/left
  public:
     VisualLine(std::list<std::list<linePoint>::iterator> &listOfIterators);
     VisualLine(std::list<linePoint> &listOfPoints);
@@ -228,7 +228,6 @@ class VisualLine : public VisualLandmark {
     HoughLine hLine1, hLine2;
     float radius; // (on screen)
     float theta; // (on screen)
-    point<int> tr, tl, br, bl;  // top right/left, bottom right/left
 
  public:
     // Getters
