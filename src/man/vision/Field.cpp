@@ -48,8 +48,8 @@ namespace vision {
 Field::Field(Vision* vis, Threshold * thr)
   : vision(vis), thresh(thr)
 {
-	setDebugFieldEdge(false);
-	setDebugHorizon(false);
+	setDebugFieldEdge(true);
+	setDebugHorizon(true);
 }
 
 /* As part of finding the convex hull, we need to know where the
@@ -175,15 +175,15 @@ void Field::findTopEdges(int M) {
             topEdge[j] = (int)cur;
             if (debugFieldEdge) {
                 if (j < convex[i].x - 2) {
-                    vision->drawPoint(j, (int)cur, BLACK);
+                    vision->drawPoint(j, (int)cur, BLUE);
                 } else {
-                    vision->drawPoint(j, (int)cur, RED);
+                    vision->drawPoint(j, (int)cur, ORANGE);
                 }
             }
         }
         if (debugFieldEdge) {
             vision->drawLine(convex[i-1].x, convex[i-1].y, convex[i].x,
-                             convex[i].y, ORANGE);
+                             convex[i].y, YELLOW);
         }
     }
     // calculate the distance to the edge of the field at three key points

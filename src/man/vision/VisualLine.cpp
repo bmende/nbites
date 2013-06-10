@@ -170,12 +170,20 @@ void VisualLine::trimEndpoints()
     } else {
         tl = Utility::getClosestPointOnLine(bl, tl, tr);
     }
-	
+
 	start.x = (tl.x + bl.x) / 2;
+    if (start.x < 0) start.x = 0;
+    if (start.x >= IMAGE_WIDTH) start.x = IMAGE_WIDTH - 1;
 	start.y = (tl.y + bl.y) / 2;
-	
+    if (start.y < 0) start.y = 0;
+    if (start.y >= IMAGE_HEIGHT) start.y = IMAGE_HEIGHT - 1;
+
 	end.x = (tr.x + br.x) / 2;
+    if (end.x < 0) end.x = 0;
+    if (end.x >= IMAGE_WIDTH) end.x = IMAGE_WIDTH - 1;
 	end.y = (tr.y + br.y) / 2;
+    if (end.y < 0) end.y = 0;
+    if (end.y >= IMAGE_HEIGHT) end.y = IMAGE_HEIGHT - 1;
 }
 
 /**
