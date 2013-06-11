@@ -115,6 +115,9 @@ class VisualLine : public VisualLandmark {
     void addPoints(const std::vector <linePoint> &additionalPoints);
     void addPoint(const linePoint &point);
 
+    void adjustStartpoint(int x, int y);
+    void adjustEndpoint(int x, int y);
+
     static const linePoint DUMMY_LINEPOINT;
 
     // Returns true if the line is more vertical on the screen than horizontal

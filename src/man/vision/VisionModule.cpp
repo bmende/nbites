@@ -166,11 +166,38 @@ void VisionModule::updateVisionField() {
     portals::Message<messages::VisionField> field_data(0);
 
     // setting lines info
-    const std::vector<boost::shared_ptr<VisualLine> >* visualLines = vision->houghLines->getLines();
+    const std::vector<boost::shared_ptr<VisualLine> >* visualLines = vision->fieldLines->getLines();
     for(std::vector<boost::shared_ptr<VisualLine> >::const_iterator i = visualLines->begin();
         i != visualLines->end(); i++)
     {
         messages::VisualLine *visLine = field_data.get()->add_visual_line();
+        visLine->mutable_visual_detection()->set_distance(i->get()->getDistance());
+        visLine->mutable_visual_detection()->set_bearing(i->get()->getBearing());
+        visLine->mutable_visual_detection()->set_distance_sd(i->get()->getDistanceSD());
+        visLine->mutable_visual_detection()->set_bearing_sd(i->get()->getBearingSD());
+        //we wont set concrete coords for the lines, since they are lines
+        visLine->set_start_x(i->get()->getStartpoint().x);
+        visLine->set_start_y(i->get()->getStartpoint().y);
+        visLine->set_end_x(i->get()->getEndpoint().x);
+        visLine->set_end_y(i->get()->getEndpoint().y);
+        visLine->set_angle(i->get()->getAngle());
+        visLine->set_avg_width(i->get()->getAvgWidth());
+        visLine->set_length(i->get()->getLength());
+        visLine->set_slope(i->get()->getSlope());
+        visLine->set_y_int(i->get()->getYIntercept());
+        const std::vector<lineID> id_for_line = i->get()->getIDs();
+        for (unsigned int k = 0; k < id_for_line.size(); k++) {
+            visLine->add_possibilities(id_for_line[k]);
+        }
+
+    }
+
+    // Now setting hough line info
+    const std::vector<boost::shared_ptr<VisualLine> >* h_visualLines = vision->houghLines->getLines();
+    for(std::vector<boost::shared_ptr<VisualLine> >::const_iterator i = h_visualLines->begin();
+        i != h_visualLines->end(); i++)
+    {
+        messages::VisualLine *visLine = field_data.get()->add_hough_line();
         visLine->mutable_visual_detection()->set_distance(i->get()->getDistance());
         visLine->mutable_visual_detection()->set_bearing(i->get()->getBearing());
         visLine->mutable_visual_detection()->set_distance_sd(i->get()->getDistanceSD());

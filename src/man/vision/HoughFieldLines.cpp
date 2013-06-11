@@ -47,6 +47,8 @@ void HoughFieldLines::cornerLoop()
 
 void HoughFieldLines::createLines()
 {
+
+    PROF_ENTER(P_HOUGH);
 	vision->linesDetector->detect(vision->thresh->getVisionHorizon(),
 								  vision->thresh->field->getTopEdge(),
 								  vision->yImg);
@@ -54,7 +56,7 @@ void HoughFieldLines::createLines()
 	vision->cornerDetector->detect(vision->thresh->getVisionHorizon(),
 								   vision->thresh->field->getTopEdge(),
 								   vision->linesDetector->getLines());
-
+    PROF_EXIT(P_HOUGH);
 	const vector<HoughVisualLine>& h_lines = vision->linesDetector->getLines();
 
 	vector<HoughVisualLine>::const_iterator line_iter;
@@ -107,7 +109,7 @@ void HoughFieldLines::checkLineWidth()
 
         if (distL > 10 || distR > 10) { //check average width
             linesList.erase(linesList.begin() + i);
-            cout << "THROWING OUT THICK-ASS LINE\n";
+            //           cout << "THROWING OUT THICK-ASS LINE\n";
         }
     }
 
@@ -126,7 +128,7 @@ void HoughFieldLines::checkFieldEdge()
         int endY = linesList[i].get()->getEndpoint().y;
 
         if (startY < topEdge[startX] && endY < topEdge[endX]) {
-            cout << "\n\nAll of the line is over the edge " << i << std::endl;
+            // cout << "\n\nAll of the line is over the edge " << i << std::endl;
             linesList.erase(linesList.begin() + i);
         }
     }

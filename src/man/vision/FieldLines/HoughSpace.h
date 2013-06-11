@@ -9,6 +9,8 @@
 #include "ActiveArray.h"
 #include "HoughConstants.h"
 
+#define USE_MMX
+
 namespace man {
 namespace vision {
 /**

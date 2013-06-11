@@ -48,8 +48,10 @@ namespace vision {
 Field::Field(Vision* vis, Threshold * thr)
   : vision(vis), thresh(thr)
 {
-	setDebugFieldEdge(true);
+#ifdef OFFLINE
+    setDebugFieldEdge(true);
 	setDebugHorizon(true);
+#endif
 }
 
 /* As part of finding the convex hull, we need to know where the

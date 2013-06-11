@@ -247,8 +247,11 @@ void Threshold::visionLoop(const messages::JointAngles& ja, const messages::Iner
     // getCorners().
 
     PROF_ENTER(P_LINES);
-	vision->houghLines->lineLoop();
+    vision->fieldLines->lineLoop();
     PROF_EXIT(P_LINES);
+//    PROF_ENTER(P_HOUGH);
+	vision->houghLines->lineLoop();
+    //  PROF_EXIT(P_HOUGH);
 
     // do recognition
     PROF_ENTER(P_OBJECT);
@@ -256,7 +259,7 @@ void Threshold::visionLoop(const messages::JointAngles& ja, const messages::Iner
     PROF_EXIT(P_OBJECT);
 
 
-	//   vision->fieldLines->afterObjectFragments();
+    vision->fieldLines->afterObjectFragments();
     // For now we don't set shooting information
     if (vision->ygCrossbar->getWidth() > 0) {
         setShot(vision->ygCrossbar);

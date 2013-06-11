@@ -172,13 +172,22 @@ QImage VisionDisplayModule::makeOverlay(Camera::Type which)
 	const messages::VisionBall *visBall = visMod.vision_ball.getMessage(true).get();
 
 	if (which == Camera::TOP) {
-		std::cout << "there are " << visField->visual_line_size() << " lines in the image\n";
+		std::cout << "there are " << visField->visual_line_size() << " v_lines in the image\n";
 		for (int i = 0; i < visField->visual_line_size(); i++) {
 
 			painter.drawLine(visField->visual_line(i).start_x(),
 							 visField->visual_line(i).start_y(),
 							 visField->visual_line(i).end_x(),
 							 visField->visual_line(i).end_y());
+		}
+        painter.setPen(Qt::cyan);
+		std::cout << "there are " << visField->hough_line_size() << " h_lines in the image\n";
+		for (int i = 0; i < visField->hough_line_size(); i++) {
+
+			painter.drawLine(visField->hough_line(i).start_x(),
+							 visField->hough_line(i).start_y(),
+							 visField->hough_line(i).end_x(),
+							 visField->hough_line(i).end_y());
 		}
 
 		painter.setPen(Qt::magenta);

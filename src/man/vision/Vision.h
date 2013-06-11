@@ -46,6 +46,7 @@ class HoughVisualCorner;
 #include "VisualObstacle.h"
 
 
+
 namespace man {
 namespace vision {
 
