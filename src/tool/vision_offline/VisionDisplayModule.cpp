@@ -240,6 +240,18 @@ QImage VisionDisplayModule::makeOverlay(Camera::Type which)
 			painter.drawConvexPolygon(l_points, 4);
 		}
 
+        painter.setPen(Qt::darkCyan);
+        if (visField->visual_cross().distance() > 0) {
+            painter.drawLine(visField->visual_cross().x() + 15,
+                             visField->visual_cross().y() + 15,
+                             visField->visual_cross().x() + 5,
+                             visField->visual_cross().y() + 5);
+            painter.drawLine(visField->visual_cross().x() + 5,
+                             visField->visual_cross().y() + 15,
+                             visField->visual_cross().x() + 15,
+                             visField->visual_cross().y() + 5);
+        }
+
 
 	}
 	else { // this is to draw in the bottom camera
