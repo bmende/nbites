@@ -11,6 +11,9 @@ Vision Constants that span multiple classes and systems.
 #include "Common.h"
 #include "ColorDefinitions.h"
 
+
+#define USE_MMX // use the assembly version of hough code.
+
 #define QQVGA 0  // equivalent to kQQVGA
 #define QVGA  1  // equivalent to kQVGA
 #define VGA   2  // equivalent to kVGA

@@ -32,6 +32,7 @@ SET( FIELD_LINES_SRCS
 SET( VISION_SRCS Ball
                  Blob
                  Blobs
+		 CenterCircle
                  ConcreteCorner
                  ConcreteLandmark
                  ConcreteFieldObject

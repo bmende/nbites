@@ -26,6 +26,7 @@ class FieldLinesDetector;
 class CornerDetector;
 class HoughVisualLine;
 class HoughVisualCorner;
+class CenterCircleDetector;
 }
 }
 
@@ -43,6 +44,8 @@ class HoughVisualCorner;
 #include "FieldLines.h"
 #include "VisualCorner.h"
 #include "VisualObstacle.h"
+
+#include "CenterCircle.h"
 
 namespace man {
 namespace vision {
@@ -173,6 +176,8 @@ public:
     const uint16_t * yImg_bot, *uImg_bot, *vImg_bot;
     boost::shared_ptr<FieldLinesDetector> linesDetector;
     boost::shared_ptr<CornerDetector> cornerDetector;
+
+    boost::shared_ptr<CenterCircleDetector> centerDetector;
 
 protected:
     //

@@ -55,6 +55,9 @@ Vision::Vision()
     pose = boost::shared_ptr<NaoPose>(new NaoPose());
     thresh = new Threshold(this, pose);
     fieldLines = boost::shared_ptr<FieldLines>(new FieldLines(this, pose));
+
+    centerDetector = boost::shared_ptr<CenterCircleDetector>
+        (new CenterCircleDetector(pose));
     // thresh->setIm(&global_8_image[0]);
 }
 
@@ -166,7 +169,11 @@ void Vision::notifyImage(const ThresholdImage& topThrIm, const PackedImage16& to
     thresh->obstacleLoop(ja, inert);
     PROF_EXIT(P_OBSTACLES)
 
-   // drawEdges(*linesDetector->getEdges());
+    centerDetector->detect(thresh->getVisionHorizon(),
+                           thresh->field->getTopEdge(),
+                           yImg);
+
+    drawEdges(*centerDetector->getEdges());
    // drawHoughLines(linesDetector->getHoughLines());
     //drawVisualLines(linesDetector->getLines(), *linesDetector->getEdges());
 //    drawVisualCorners(cornerDetector->getCorners());
@@ -605,7 +612,7 @@ void Vision::drawPoint(int x, int y, int c)
 void Vision::drawEdges(Gradient& g)
 {
 #ifdef OFFLINE
-    if (thresh->debugEdgeDetection){
+    if (true){
         for (int i=0; g.isPeak(i); ++i) {
             drawDot(g.getAnglesXCoord(i) + IMAGE_WIDTH/2,
                     g.getAnglesYCoord(i) + IMAGE_HEIGHT/2,
