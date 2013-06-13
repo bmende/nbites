@@ -5,7 +5,10 @@
 #include <list>
 #include <vector>
 
+#include <time.h>
+
 #include <boost/random.hpp>
+#include <boost/random/uniform_real.hpp>
 
 #include "FieldLines/EdgeDetector.h"
 #include "Vision.h"
@@ -15,7 +18,7 @@ namespace man {
 namespace vision {
 
 struct Circle {
-    float x, y;
+    point<float> center;
     float radius;
 };
 
@@ -33,11 +36,18 @@ public:
     boost::shared_ptr<Gradient> getEdges() { return cGradient; };
 
     Circle generateCircle(point<float> a, point<float> b, point<float> c);
+    point<float> getCircleCenter() { return centerCircleGuess.center; };
+
 private:
+
+    float distanceBetweenPoints(point<float> a, point<float> b);
+
     boost::shared_ptr<EdgeDetector> cEdges;
     boost::shared_ptr<Gradient> cGradient;
 
     boost::shared_ptr<NaoPose> pose;
+
+    Circle centerCircleGuess;
 
 
 };
