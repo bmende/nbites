@@ -176,7 +176,7 @@ void Vision::notifyImage(const ThresholdImage& topThrIm, const PackedImage16& to
 
     drawEllipse(centerDetector->getEllipses());
 
-    //drawEdges(*centerDetector->getEdges());
+    drawEdges(*centerDetector->getEdges());
    // drawHoughLines(linesDetector->getHoughLines());
     //drawVisualLines(linesDetector->getLines(), *linesDetector->getEdges());
 //    drawVisualCorners(cornerDetector->getCorners());
@@ -705,8 +705,8 @@ void Vision::drawEllipse(vector<Ellipse> e)
         float increment = (2*M_PI*increment_arc_length) / perimeter;
 
         for (float t = 0; t < 2 * M_PI; t+=increment) {
-            float x = ( x_0 + a*cosT*cos(t) - b*sinT*sin(t));
-            float y = ( y_0 + a*cosT*sin(t) + b*sinT*cos(t));
+            int x = ( x_0 + a*cosT*cos(t) - b*sinT*sin(t));
+            int y = ( y_0 + a*sinT*cos(t) + b*cosT*sin(t));
 
             drawDot((int)x, (int)y, MAROON);
         }

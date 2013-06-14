@@ -30,8 +30,9 @@ void CenterCircleDetector::detect(int upperBound,
                                   const uint16_t *img)
 {
 
-    upperBound -= 10; // just in case horizon is too low
-    upperBound = min(max(0, upperBound), IMAGE_HEIGHT - 3);
+    upperBound += 30; // just in case horizon is too low
+    //   upperBound = min(max(0, upperBound), IMAGE_HEIGHT - 3);
+
 
     reset();
     cGradient->reset();
@@ -51,6 +52,7 @@ void CenterCircleDetector::detect(int upperBound,
 
         Ellipse result;
         if (generateEllipse(points, result)) {
+            cout << result << endl;
             ellipses.push_back(result);
         }
 
@@ -108,17 +110,14 @@ bool CenterCircleDetector::generateEllipse(int points[3], Ellipse &out) {
     out.major = sqrt(1/result(0)); //semimajor = sqrt(1/A)
     out.minor = sqrt(1/result(2)); //semiminor = sqrt(1/C)
 
+    if (out.major > IMAGE_WIDTH/2 || out.minor > IMAGE_WIDTH/2)
+        return false;
+
     if (isnan(out.major) || isnan(out.minor)) return false;
 
-    out.theta = 2 * atan(2*result(1) / (result(0) - result(2))); // tan(2*theta) = 2B/(A-C)
+    out.theta = 0.5 * atan(2*result(1) / (result(0) - result(2))); // tan(2*theta) = 2B/(A-C)
 
-    if (debugEllipse) {
-        cout << "Ellipse: center = " << out.center << "\tsemimajor: "
-             << out.major << " semiminor: " << out.minor << " orientation: "
-             << out.theta << endl;
-    }
-
-    return true;
+    return verifyEllipse(out);
 
 }
 
@@ -194,6 +193,47 @@ bool CenterCircleDetector::generateEllipseCenter(int points[3], point<int>& out)
     }
     else
         return false;
+}
+
+
+bool CenterCircleDetector::verifyEllipse(Ellipse &e)
+{
+
+    int x_0 = e.center.x;
+    int y_0 = e.center.y;
+    float a = e.major;
+    float b = e.minor;
+    float cosT = cos(e.theta);
+    float sinT = sin(e.theta);
+
+    float perimeter = M_PI*(3*(a+b) - sqrt((3*a+b)*(a+3*b))); // Ramanujan's Approx.
+    int increment_arc_length = 10; // find about 1 edge per ial units of circumference.
+    int box = (increment_arc_length / 2) - 1; // look around the point, but not in another box
+    if(box < 0) box = 0;
+    float increment = (2*M_PI*increment_arc_length) / perimeter;
+
+    int numEdges = 0;
+    for (float t = 0; t < 2 * M_PI; t+=increment) {
+        int x = ( x_0 + a*cosT*cos(t) - b*sinT*sin(t));
+        int y = ( y_0 + a*sinT*cos(t) + b*cosT*sin(t));
+
+        if (x > IMAGE_WIDTH - box || x < 0 + box
+            || y > IMAGE_HEIGHT - box || y < 0 + box)
+            continue; // point outside image, so no edges;
+
+        for (int dx = -box; dx < box; dx++) {
+            for (int dy = -box; dy < box; dy++) {
+                int i = x + dx - IMAGE_WIDTH/2;
+                int j = y + dy - IMAGE_HEIGHT/2;
+                if (cGradient->peaks_list_contains(j, i)) numEdges++;
+            }
+        }
+    }
+    e.ver = numEdges/perimeter;
+
+    if (e.ver == 0) return false;
+    return true;
+
 }
 
 int CenterCircleDetector::getR(int x, int y, int t)

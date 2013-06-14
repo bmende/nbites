@@ -30,6 +30,14 @@ struct Ellipse {
     float major;
     float minor;
     float theta; // the angle between major and x axes
+    float ver;
+
+    friend std::ostream& operator<< (std::ostream &o, const Ellipse &e)
+    {
+        return o << "center: " << e.center << ",\tmajor: " << e.major
+                 << ",\tminor: " << e.minor << ",\torientation: " << e.theta
+                 << ",\tscore: " << e.ver;
+    }
 };
 
 class CenterCircleDetector {
@@ -58,6 +66,8 @@ private:
     float distanceBetweenPoints(point<float> a, point<float> b);
     int distanceBetweenPoints(point<int> a, point<int> b);
     int getR(int x, int y, int t);
+
+    bool verifyEllipse(Ellipse &out);
 
     void reset();
 
