@@ -31,69 +31,58 @@ void CenterCircleDetector::detect(int upperBound,
 
     cout << cGradient->numPeaks << " is the number of gradient peaks\n";
 
-    point<float> points[3];
-    Circle cur, best;
-
     boost::mt19937 gen(time(0));
     boost::uniform_int<> distro(0, cGradient->numPeaks - 1);
 
-    float bestRANSACVar = 10000;
-    int numAttempts = 0.2*cGradient->numPeaks;
-    int bestNumPoints = 0;
-    for (int j = 0; j < 40; j++) { // this is the ransac thing
-
-        float bestVar = 10000, centerRad = 750;
-        for (int n = 0; n < numAttempts; n++) {
-
-            for (int i = 0; i < 3; i++) {
-                int edge_number = distro(gen); // some random number between 0 and numPeaks;
-                int img_x = cGradient->getAnglesXCoord(edge_number) + IMAGE_WIDTH/2;
-                int img_y = cGradient->getAnglesYCoord(edge_number) + IMAGE_HEIGHT/2;
-                estimate e = pose->pixEstimate(img_x, img_y, 0.0f);
-                points[i].x = e.x;
-                points[i].y = e.y;
-            }
-
-            cur = generateCircle(points[0], points[1], points[2]);
-            if ((fabs(cur.radius - centerRad)) < bestVar) {
-                bestVar = fabs(cur.radius - centerRad);
-                best = cur;
-            }
-        }
-        int numPoints = 0;
-        float var = 0;
-        for (int n = 0; n < cGradient->numPeaks; n++) {
-
-            int img_x = cGradient->getAnglesXCoord(n) + IMAGE_WIDTH/2;
-            int img_y = cGradient->getAnglesYCoord(n) + IMAGE_HEIGHT/2;
-            estimate e = pose->pixEstimate(img_x, img_y, 0.0f);
-
-            point<float> test; test.x = e.x; test.y = e.y;
-            float difference = fabs(distanceBetweenPoints(test, best.center) - centerRad);
-            if (difference < 15) {
-                var += pow(difference, 2);
-                numPoints++;
-            }
-        }
-        var = 0.2*var - numPoints;
-        if (var < bestRANSACVar) {
-            bestRANSACVar = var;
-            centerCircleGuess = best;
-            bestNumPoints = numPoints;
-        }
-
+    int points[3];
+    for (int i = 0; i < 3; i++) {
+        points[i] = distro(gen);
     }
 
-    best = centerCircleGuess;
-    cout << best.center.x << ", " << best.center.y << " radius: " << best.radius;
-    cout << " and there are " << bestNumPoints << " in it\n";
+    generateEllipseCenter(points);
 
-    estimate f = pose->pixEstimate(best.center.x, best.center.y, 0);
-    cout << "center is distance " << f.dist << " and bearing " << f.bearing << endl;
 
 
 }
 
+point<int> CenterCircleDetector::generateEllipseCenter(int points[3])
+{
+
+    HoughLine lines[3];
+    int x[3], y[3];
+    for (int i = 0; i < 3; i++) {
+        int x[i] = cGradient->getAnglesXCoord(points[i]);
+        int y[i] = cGradient->getAnglesYCoord(points[i]);
+        int t = cGradient->getAngle(points[i]);
+        int r = getR(x[i], y[i], t);
+        HoughLine l(r, t, 0);
+        lines[i] = l;
+    }
+
+    point<int> t_12;
+    if (!lines[0].intersects(lines[1], t_12)) {
+        t_12 = NULL;
+}
+
+int CenterCircleDetector::getR(int x, int y, int t)
+{
+    float a = static_cast<float>(t & 0xff) * M_PI_FLOAT / 128.0f;
+    return static_cast<int>(floor(static_cast<float>(x) * cos(a) +
+                                  static_cast<float>(y) * sin(a)));
+}
+
+float CenterCircleDetector::distanceBetweenPoints(point<float> a,
+                                                  point<float> b)
+{
+
+    float dist = sqrt( pow((a.x - b.x), 2) + pow((a.y - b.y), 2) );
+
+    return dist;
+}
+
+
+
+/**************************** OUTDATED CIRCLE STUFF ************************/
 Circle CenterCircleDetector::generateCircle(point<float> a,
                                             point<float> b,
                                             point<float> c) {
@@ -114,18 +103,8 @@ Circle CenterCircleDetector::generateCircle(point<float> a,
     circ.center.y = (-1*(circ.center.x - (a.x + b.x)/2) / aSlope) + ((a.y + b.y) / 2);
 
     circ.radius = distanceBetweenPoints(circ.center, a);
-  
+
     return circ;
 }
-
-float CenterCircleDetector::distanceBetweenPoints(point<float> a,
-                                                  point<float> b)
-{
-
-    float dist = sqrt( pow((a.x - b.x), 2) + pow((a.y - b.y), 2) );
-
-    return dist;
-}
-
 }
 }
