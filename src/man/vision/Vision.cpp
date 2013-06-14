@@ -174,7 +174,9 @@ void Vision::notifyImage(const ThresholdImage& topThrIm, const PackedImage16& to
                            thresh->field->getTopEdge(),
                            yImg);
 
-    drawEdges(*centerDetector->getEdges());
+    drawEllipse(centerDetector->getEllipses());
+
+    //drawEdges(*centerDetector->getEdges());
    // drawHoughLines(linesDetector->getHoughLines());
     //drawVisualLines(linesDetector->getLines(), *linesDetector->getEdges());
 //    drawVisualCorners(cornerDetector->getCorners());
@@ -685,6 +687,35 @@ void Vision::drawVisualCorners(const vector<HoughVisualCorner>& corners)
 #endif
 }
 
+void Vision::drawEllipse(vector<Ellipse> e)
+{
+
+    for (int i = 0; i < e.size(); i++) {
+        int x_0 = e[i].center.x;
+        int y_0 = e[i].center.y;
+        float a = e[i].major;
+        float b = e[i].minor;
+        float cosT = cos(e[i].theta);
+        float sinT = sin(e[i].theta);
+
+        drawX(x_0, y_0, MAROON);
+
+        float perimeter = M_PI*(3*(a+b) - sqrt((3*a+b)*(a+3*b))); // Ramanujan approx.
+        int increment_arc_length = 1; //seems right
+        float increment = (2*M_PI*increment_arc_length) / perimeter;
+
+        for (float t = 0; t < 2 * M_PI; t+=increment) {
+            float x = ( x_0 + a*cosT*cos(t) - b*sinT*sin(t));
+            float y = ( y_0 + a*cosT*sin(t) + b*sinT*cos(t));
+
+            drawDot((int)x, (int)y, MAROON);
+        }
+    }
+}
+
 
 }
+
+
 }
+

@@ -112,6 +112,8 @@ public:
     void drawVisualLines(const std::vector<HoughVisualLine>& lines, Gradient& g);
     void drawX(int x, int y, int c);
 
+    void drawEllipse(std::vector<Ellipse> e);
+
     //
     // SETTERS
     //

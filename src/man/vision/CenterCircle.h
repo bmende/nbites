@@ -10,6 +10,8 @@
 #include <boost/random.hpp>
 #include <boost/random/uniform_real.hpp>
 
+struct Ellipse;
+
 #include "FieldLines/EdgeDetector.h"
 #include "geom/HoughLine.h"
 #include "Vision.h"
@@ -27,6 +29,7 @@ struct Ellipse {
     point<int> center;
     float major;
     float minor;
+    float theta; // the angle between major and x axes
 };
 
 class CenterCircleDetector {
@@ -42,16 +45,21 @@ public:
 
     boost::shared_ptr<Gradient> getEdges() { return cGradient; };
 
-    Ellipse generateEllipse();
-    point<int> generateEllipseCenter(int points[3]);
+    bool generateEllipse(int points[3], Ellipse &out);
+    bool generateEllipseCenter(int points[3], point<int>& out);
 
     Circle generateCircle(point<float> a, point<float> b, point<float> c);
     point<float> getCircleCenter() { return centerCircleGuess.center; };
 
+    std::vector<Ellipse> getEllipses() { return ellipses; }
+
 private:
 
     float distanceBetweenPoints(point<float> a, point<float> b);
+    int distanceBetweenPoints(point<int> a, point<int> b);
     int getR(int x, int y, int t);
+
+    void reset();
 
     boost::shared_ptr<EdgeDetector> cEdges;
     boost::shared_ptr<Gradient> cGradient;
@@ -59,7 +67,9 @@ private:
     boost::shared_ptr<NaoPose> pose;
 
     Circle centerCircleGuess;
+    std::vector<Ellipse> ellipses;
 
+    bool debugEllipse;
 
 };
 
