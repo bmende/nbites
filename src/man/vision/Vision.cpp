@@ -657,7 +657,7 @@ void Vision::drawHoughLine(const HoughLine& line, int color)
 #endif
 }
 
-    void Vision::drawVisualLines(const vector<HoughVisualLine>& lines, Gradient& g)
+void Vision::drawVisualLines(const vector<HoughVisualLine>& lines, Gradient& g)
 {
 #ifdef OFFLINE
     if (true){
@@ -695,8 +695,8 @@ void Vision::drawEllipse(vector<Ellipse> e)
         int y_0 = e[i].center.y;
         float a = e[i].major;
         float b = e[i].minor;
-        float cosT = cos(e[i].theta);
-        float sinT = sin(e[i].theta);
+        // float cosT = cos(e[i].theta);
+        // float sinT = sin(e[i].theta);
 
         drawX(x_0, y_0, MAROON);
 
@@ -705,8 +705,8 @@ void Vision::drawEllipse(vector<Ellipse> e)
         float increment = (2*M_PI*increment_arc_length) / perimeter;
 
         for (float t = 0; t < 2 * M_PI; t+=increment) {
-            int x = ( x_0 + a*cosT*cos(t) - b*sinT*sin(t));
-            int y = ( y_0 + a*sinT*cos(t) + b*cosT*sin(t));
+            int x = ( x_0 + a*cos(t));
+            int y = ( y_0 + b*sin(t));
 
             drawDot((int)x, (int)y, MAROON);
         }

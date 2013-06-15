@@ -30,7 +30,7 @@ void CenterCircleDetector::detect(int upperBound,
                                   const uint16_t *img)
 {
 
-    upperBound += 30; // just in case horizon is too low
+    upperBound += 10; // just in case horizon is too low
     //   upperBound = min(max(0, upperBound), IMAGE_HEIGHT - 3);
 
 
@@ -42,12 +42,15 @@ void CenterCircleDetector::detect(int upperBound,
         cout << cGradient->numPeaks << " is the number of gradient peaks\n";
 
     boost::mt19937 gen(time(0));
-    boost::uniform_int<> distro(0, cGradient->numPeaks - 1);
+    int maxPeaks = cGradient->numPeaks - 1;
+    boost::uniform_int<> distro(maxPeaks/4, 3*maxPeaks/4);
 
-    for (int n = 0; n < 500; n++) {
-        int points[3];
+    for (int n = 0; n < 2000; n++) {
+        point<int> points[3];
         for (int i = 0; i < 3; i++) {
-            points[i] = distro(gen);
+            int temp = distro(gen);
+            points[i].x = cGradient->getAnglesXCoord(temp);
+            points[i].y = cGradient->getAnglesYCoord(temp);
         }
 
         Ellipse result;
@@ -61,7 +64,7 @@ void CenterCircleDetector::detect(int upperBound,
 
 }
 
-bool CenterCircleDetector::generateEllipse(int points[3], Ellipse &out) {
+bool CenterCircleDetector::generateEllipse(point<int> points[3], Ellipse &out) {
 
     if (!generateEllipseCenter(points, out.center)) return false;
 
@@ -78,10 +81,8 @@ bool CenterCircleDetector::generateEllipse(int points[3], Ellipse &out) {
 
     float x[3], y[3], x2[3], y2[3];
     for (int i = 0; i < 3; i++) {
-        x[i] = (float)cGradient->getAnglesXCoord(points[i]);
-        y[i] = (float)cGradient->getAnglesYCoord(points[i]);
-        x[i] += IMAGE_WIDTH/2;
-        y[i] += IMAGE_HEIGHT/2;
+        x[i] = (float)(points[i].x + IMAGE_WIDTH/2);
+        y[i] = (float)(points[i].y + IMAGE_HEIGHT/2);
         x2[i] = x[i] * x[i];
         y2[i] = y[i] * y[i];
     }
@@ -110,29 +111,30 @@ bool CenterCircleDetector::generateEllipse(int points[3], Ellipse &out) {
     out.major = sqrt(1/result(0)); //semimajor = sqrt(1/A)
     out.minor = sqrt(1/result(2)); //semiminor = sqrt(1/C)
 
-    if (out.major > IMAGE_WIDTH/2 || out.minor > IMAGE_WIDTH/2)
+    if (out.minor > out.major) return false; // what we know about the center circle
+
+    if (out.major > IMAGE_WIDTH/2 || out.minor > IMAGE_WIDTH/2) // too big
+        return false;
+
+    if (out.major < 50 || out.minor < 40) // too small
         return false;
 
     if (isnan(out.major) || isnan(out.minor)) return false;
-
-    out.theta = 0.5 * atan(2*result(1) / (result(0) - result(2))); // tan(2*theta) = 2B/(A-C)
 
     return verifyEllipse(out);
 
 }
 
-bool CenterCircleDetector::generateEllipseCenter(int points[3], point<int>& out)
+bool CenterCircleDetector::generateEllipseCenter(point<int> points[3], point<int>& out)
 {
-    static const int CENTER_DIFFERENCE_THRESHOLD = 15;
+    static const int CENTER_DIFFERENCE_THRESHOLD = 10;
 
     // find tangent lines to ellipse
     HoughLine lines[3];
-    int x[3], y[3];
     for (int i = 0; i < 3; i++) {
-        x[i] = cGradient->getAnglesXCoord(points[i]);
-        y[i] = cGradient->getAnglesYCoord(points[i]);
-        int t = cGradient->getAngle(points[i]);
-        int r = getR(x[i], y[i], t);
+        int t = cGradient->getAngle(
+            cGradient->peaks_list_contains(points[i].y, points[i].x - 1));
+        int r = getR(points[i].x, points[i].y, t);
         HoughLine l(r, t, 0);
         lines[i] = l;
     }
@@ -144,9 +146,9 @@ bool CenterCircleDetector::generateEllipseCenter(int points[3], point<int>& out)
     lines[1].intersects(lines[2], t_12);
 
     // find bisectors of previous intersections;
-    point<int> m_01((x[0]+x[1])/2, (y[0]+y[1])/2);
-    point<int> m_02((x[0]+x[2])/2, (y[0]+y[2])/2);
-    point<int> m_12((x[1]+x[2])/2, (y[1]+y[2])/2);
+    point<int> m_01((points[0].x+points[1].x)/2, (points[0].y+points[1].y)/2);
+    point<int> m_02((points[0].x+points[2].x)/2, (points[0].y+points[2].y)/2);
+    point<int> m_12((points[1].x+points[2].x)/2, (points[1].y+points[2].y)/2);
 
     float slope_01 = (float)(m_01.y - t_01.y) / (float)(m_01.x - t_01.x);
     float slope_02 = (float)(m_02.y - t_02.y) / (float)(m_02.x - t_02.x);
@@ -203,8 +205,6 @@ bool CenterCircleDetector::verifyEllipse(Ellipse &e)
     int y_0 = e.center.y;
     float a = e.major;
     float b = e.minor;
-    float cosT = cos(e.theta);
-    float sinT = sin(e.theta);
 
     float perimeter = M_PI*(3*(a+b) - sqrt((3*a+b)*(a+3*b))); // Ramanujan's Approx.
     int increment_arc_length = 10; // find about 1 edge per ial units of circumference.
@@ -214,8 +214,8 @@ bool CenterCircleDetector::verifyEllipse(Ellipse &e)
 
     int numEdges = 0;
     for (float t = 0; t < 2 * M_PI; t+=increment) {
-        int x = ( x_0 + a*cosT*cos(t) - b*sinT*sin(t));
-        int y = ( y_0 + a*sinT*cos(t) + b*cosT*sin(t));
+        int x = ( x_0 + a*cos(t));
+        int y = ( y_0 + b*sin(t));
 
         if (x > IMAGE_WIDTH - box || x < 0 + box
             || y > IMAGE_HEIGHT - box || y < 0 + box)
@@ -229,9 +229,10 @@ bool CenterCircleDetector::verifyEllipse(Ellipse &e)
             }
         }
     }
-    e.ver = numEdges/perimeter;
 
-    if (e.ver == 0) return false;
+    if (numEdges == 0) return false;
+    e.ver = numEdges / (perimeter);
+    if (e.ver < 0.25) return false;
     return true;
 
 }

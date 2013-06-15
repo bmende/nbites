@@ -29,14 +29,12 @@ struct Ellipse {
     point<int> center;
     float major;
     float minor;
-    float theta; // the angle between major and x axes
     float ver;
 
     friend std::ostream& operator<< (std::ostream &o, const Ellipse &e)
     {
         return o << "center: " << e.center << ",\tmajor: " << e.major
-                 << ",\tminor: " << e.minor << ",\torientation: " << e.theta
-                 << ",\tscore: " << e.ver;
+                 << ",\tminor: " << e.minor << ",\tscore: " << e.ver;
     }
 };
 
@@ -53,8 +51,8 @@ public:
 
     boost::shared_ptr<Gradient> getEdges() { return cGradient; };
 
-    bool generateEllipse(int points[3], Ellipse &out);
-    bool generateEllipseCenter(int points[3], point<int>& out);
+    bool generateEllipse(point<int> points[3], Ellipse &out);
+    bool generateEllipseCenter(point<int> points[3], point<int>& out);
 
     Circle generateCircle(point<float> a, point<float> b, point<float> c);
     point<float> getCircleCenter() { return centerCircleGuess.center; };
@@ -68,6 +66,8 @@ private:
     int getR(int x, int y, int t);
 
     bool verifyEllipse(Ellipse &out);
+
+    void deleteLinesEdges(const std::list<HoughLine>& lines);
 
     void reset();
 
