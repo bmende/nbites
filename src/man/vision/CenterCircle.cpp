@@ -41,11 +41,13 @@ void CenterCircleDetector::detect(int upperBound,
     if (debugEllipse)
         cout << cGradient->numPeaks << " is the number of gradient peaks\n";
 
+    if (cGradient->numPeaks < 500) return;
+
     boost::mt19937 gen(time(0));
     int maxPeaks = cGradient->numPeaks - 1;
     boost::uniform_int<> distro(maxPeaks/4, 3*maxPeaks/4);
 
-    for (int n = 0; n < 2000; n++) {
+    for (int n = 0; n < 5000; n++) {
         point<int> points[3];
         for (int i = 0; i < 3; i++) {
             int temp = distro(gen);
@@ -55,16 +57,42 @@ void CenterCircleDetector::detect(int upperBound,
 
         Ellipse result;
         if (generateEllipse(points, result)) {
-            cout << result << endl;
-            ellipses.push_back(result);
+            accumulate(result);
         }
-
     }
+    for (int i = 0; i < ellipses.size(); i++)
+        cout << ellipses[i] << endl;
 
 
 }
 
-bool CenterCircleDetector::generateEllipse(point<int> points[3], Ellipse &out) {
+void CenterCircleDetector::accumulate(Ellipse e)
+{
+    // We begin with ellipses.size = 0;
+    // So the first ellipse is added with score of 1
+    if (ellipses.size() == 0) {
+        e.score = 1;
+        ellipses.push_back(e);
+        return;
+    }
+
+    for (vector<Ellipse>::iterator i = ellipses.begin();
+         i != ellipses.end(); i++) {
+        if (distanceBetweenPoints(i->center, e.center) < 50) {
+            i->center.x = ((i->score * i->center.x) + e.center.x) / (i->score + 1);
+            i->center.y = ((i->score * i->center.y) + e.center.y) / (i->score + 1);
+            i->major = ((i->score * i->major) + e.major) / (i->score + 1);
+            i->minor = ((i->score * i->minor) + e.minor) / (i->score + 1);
+            i->score++;
+            verifyEllipse(*i);
+            return;
+        }
+    }
+    ellipses.push_back(e);
+}
+
+bool CenterCircleDetector::generateEllipse(point<int> points[3], Ellipse &out)
+{
 
     if (!generateEllipseCenter(points, out.center)) return false;
 
@@ -127,7 +155,6 @@ bool CenterCircleDetector::generateEllipse(point<int> points[3], Ellipse &out) {
 
 bool CenterCircleDetector::generateEllipseCenter(point<int> points[3], point<int>& out)
 {
-    static const int CENTER_DIFFERENCE_THRESHOLD = 10;
 
     // find tangent lines to ellipse
     HoughLine lines[3];
@@ -232,7 +259,7 @@ bool CenterCircleDetector::verifyEllipse(Ellipse &e)
 
     if (numEdges == 0) return false;
     e.ver = numEdges / (perimeter);
-    if (e.ver < 0.25) return false;
+    if (e.ver < 0.2) return false;
     return true;
 
 }

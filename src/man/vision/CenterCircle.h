@@ -20,6 +20,8 @@ struct Ellipse;
 namespace man {
 namespace vision {
 
+static const int CENTER_DIFFERENCE_THRESHOLD = 10;
+
 struct Circle {
     point<float> center;
     float radius;
@@ -30,11 +32,18 @@ struct Ellipse {
     float major;
     float minor;
     float ver;
+    int score;
+
+    Ellipse() {
+        center.x = 0; center.y = 0; major = 0; minor = 0;
+        ver = 0; score = 1;
+    }
 
     friend std::ostream& operator<< (std::ostream &o, const Ellipse &e)
     {
         return o << "center: " << e.center << ",\tmajor: " << e.major
-                 << ",\tminor: " << e.minor << ",\tscore: " << e.ver;
+                 << ",\tminor: " << e.minor << ",\tver: " << e.ver
+                 << ",\tscore: " << e.score;
     }
 };
 
@@ -51,15 +60,15 @@ public:
 
     boost::shared_ptr<Gradient> getEdges() { return cGradient; };
 
+    std::vector<Ellipse> getEllipses() { return ellipses; }
+
+private:
+
     bool generateEllipse(point<int> points[3], Ellipse &out);
     bool generateEllipseCenter(point<int> points[3], point<int>& out);
 
     Circle generateCircle(point<float> a, point<float> b, point<float> c);
     point<float> getCircleCenter() { return centerCircleGuess.center; };
-
-    std::vector<Ellipse> getEllipses() { return ellipses; }
-
-private:
 
     float distanceBetweenPoints(point<float> a, point<float> b);
     int distanceBetweenPoints(point<int> a, point<int> b);
@@ -70,6 +79,8 @@ private:
     void deleteLinesEdges(const std::list<HoughLine>& lines);
 
     void reset();
+
+    void accumulate(Ellipse e); // now we find out how many of each ellipse there is
 
     boost::shared_ptr<EdgeDetector> cEdges;
     boost::shared_ptr<Gradient> cGradient;
